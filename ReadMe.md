@@ -36,4 +36,3 @@ Upload images with:
 | Image Ops | Pillow, OpenCV, NumPy |
 | Language | Python 3.10+ |
 
-

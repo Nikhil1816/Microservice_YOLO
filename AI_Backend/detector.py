@@ -1,4 +1,3 @@
-# detector.py
 import cv2
 import numpy as np
 import os
@@ -12,19 +11,15 @@ class YOLOv3Detector:
         if not os.path.exists(cfg_path) or not os.path.exists(weights_path) or not os.path.exists(names_path):
             raise FileNotFoundError("One of YOLO model files is missing in 'model/' folder.")
 
-        # Load names
         with open(names_path, "r") as f:
             self.classes = [c.strip() for c in f.readlines()]
 
-        # Load network
         self.net = cv2.dnn.readNetFromDarknet(cfg_path, weights_path)
         self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
         self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
-        # get output layer names
         self.output_layers = self.net.getUnconnectedOutLayersNames()
 
-        # thresholds
         self.conf_threshold = conf_threshold
         self.nms_threshold = nms_threshold
         self.input_size = input_size
@@ -43,7 +38,6 @@ class YOLOv3Detector:
         confidences = []
         class_ids = []
 
-        # iterate detections
         for output in layerOutputs:
             for detection in output:
                 scores = detection[5:]
@@ -54,14 +48,12 @@ class YOLOv3Detector:
                     (centerX, centerY, width, height) = box.astype("int")
                     x = int(centerX - (width / 2))
                     y = int(centerY - (height / 2))
-                    # clamp coords
                     x = max(0, x); y = max(0, y)
                     w = int(width); h = int(height)
                     boxes.append([x, y, w, h])
                     confidences.append(confidence)
                     class_ids.append(class_id)
 
-        # apply non-max suppression
         idxs = cv2.dnn.NMSBoxes(boxes, confidences, self.conf_threshold, self.nms_threshold)
 
         detections = []

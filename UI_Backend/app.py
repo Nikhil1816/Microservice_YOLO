@@ -7,22 +7,17 @@ from dotenv import load_dotenv
 from utils import ensure_dir
 import base64
 
-
-# Load env vars (only for local dev)
 load_dotenv()
 
-# Configuration
 AI_URL = os.getenv("AI_URL", "http://localhost:8001/detect")  
 OUTPUT_DIR = os.getenv("OUTPUT_DIR", "../output")
 ensure_dir(OUTPUT_DIR)
 
-# Streamlit page
 st.set_page_config(page_title="Object Detection UI", layout="wide")
 
 st.title("Object Detection — Streamlit UI")
 st.write("Upload an image → sent to AI backend → shows AI output (annotated image + JSON)")
 
-# Sidebar Info
 with st.sidebar:
     st.header("Configuration")
     st.write("AI Endpoint:")
@@ -30,14 +25,12 @@ with st.sidebar:
     st.write("Output folder:")
     st.code(OUTPUT_DIR)
 
-# File Upload
 uploaded_file = st.file_uploader("Upload an Image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is None:
     st.info("Please upload an image to start detection.")
     st.stop()
 
-# Read and preview the input image
 image_bytes = uploaded_file.read()
 try:
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
@@ -51,7 +44,6 @@ with col1:
     st.subheader("Input Image")
     st.image(image, use_column_width=True)
 
-# Run detection
 if st.button("Run Detection"):
     status = st.empty()
     status.info("Sending image to AI backend...")
@@ -67,7 +59,6 @@ if st.button("Run Detection"):
 
     status.success("Detection complete!")
 
-    # Backend must provide annotated image bytes (BASE64 or raw bytes)
     annotated_bytes = base64.b64decode(data["annotated_image"])
     annotated_img = Image.open(io.BytesIO(annotated_bytes))
 
@@ -77,7 +68,6 @@ if st.button("Run Detection"):
         st.subheader("Detections JSON")
         st.json(data.get("detections", []))
 
-    # Download buttons
     with st.expander("Download results"):
         st.download_button(
             "Download Annotated Image",
